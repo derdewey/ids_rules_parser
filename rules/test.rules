@@ -1,0 +1,6 @@
+    
+# i am a comment
+
+alert tcp $HTTP_SERVERS $HTTP_PORTS -> $EXTERNAL_NET any (msg:"ET ATTACK_RESPONSE HTTP 401 Unauthorized"; flow:from_server,established; content:"HTTP/1."; depth:7; content:" 401"; within:5; threshold: type both, count 1, seconds 300, track by_dst; classtype:attempted-recon; reference:url,doc.emergingthreats.net/2009345; reference:url,www.emergingthreats.net/cgi-bin/cvsweb.cgi/sigs/ATTACK_RESPONSE/ATTACK_RESPONSE_401_Unauthorized; sid:2009345; rev:5;)
+
+alert tcp $HTTP_SERVERS $HTTP_PORTS -> $EXTERNAL_NET any (msg:"ET ATTACK_RESPONSE HTTP 401 Unauthorized"; nocase; flow:from_server,established; content:"HTTP/1."; depth:7; content:" 401"; within:5; threshold: type both, count 1, seconds 300, track by_dst; classtype:attempted-recon; reference:url,doc.emergingthreats.net/2009345; reference:url,www.emergingthreats.net/cgi-bin/cvsweb.cgi/sigs/ATTACK_RESPONSE/ATTACK_RESPONSE_401_Unauthorized; sid:2009345; rev:5;)

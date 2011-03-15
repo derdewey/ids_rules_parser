@@ -1,0 +1,103 @@
+require 'rubygems'
+require 'treetop'
+require 'pp'
+
+grammar Rules
+  rule rules_file
+    (complete_sig / comment / empty_line)*
+    {
+        def process
+            elements.collect do |x|
+                x.process
+            end.select do |x|
+                !x.nil?
+            end
+        end
+    }
+  end
+  rule comment
+    "#" comment_text:(![\n] .)* "\n"
+    {
+        def process
+            nil
+        end
+    }
+  end
+  rule empty_line
+    ((!"\n" [\s])+)? "\n"
+    {
+        def process
+            nil
+        end
+    }
+  end
+  rule complete_sig
+    app sig
+    {
+        def process
+            return {:application => app.process, :signature => sig.process}
+        end
+    }
+  end
+  rule app
+    "alert" space proto space src_host:hosts space src_port:ports space "->" space dest_host:hosts space dest_port:ports space
+    {
+        def process
+            return {:protocol => proto.text_value, :src_host => src_host.text_value,
+               :src_port => src_port.text_value, :dest_host => dest_host.text_value,
+               :dest_port => dest_port.text_value}
+        end
+    }
+    #  space proto .*
+    # from_ips from_ports "->" to_ips to_ports
+  end
+  rule sig
+    "(" values:(key_value)+ ")"
+    {
+        def process
+            values.elements.collect{|x| x.process}
+        end
+    }
+  end
+  rule key_value
+    space? key ":" value ";"
+    #space? key (":" value)? ";"
+    {
+        def process
+            begin
+                if(value.nil?)
+                    return {key.text_value => nil}
+                else
+                    return {key.text_value => value.text_value}
+                end
+            rescue => e
+                puts e.to_s
+                puts e.backtrace
+                raise "OH SHIT on #{text_value}"
+            end
+        end
+    }
+  end
+  rule key
+    [\w]+
+  end
+  rule value
+    (![:;] .)+
+    #(quoted_value) / (![:;] .)+
+  end
+  rule quoted_value # for future ref
+    (["] (!["] .)* ["])
+  end
+  rule space
+    [\s]+
+  end
+  rule proto
+    "tcp" / "udp"
+  end
+  rule hosts
+    (!" " .)* / "any"
+  end
+  rule ports
+    (!" " .)* / "any"
+  end
+end
