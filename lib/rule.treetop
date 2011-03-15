@@ -8,11 +8,7 @@ grammar Rules
     {
         def process
             elements.collect do |x|
-                begin
-                    x.process
-                rescue => e
-                    puts "FUCKED UP ON: " + x.text_value
-                end
+                x.process
             end.select do |x|
                 !x.nil?
             end
@@ -49,9 +45,11 @@ grammar Rules
     "alert" space proto space src_host:hosts space src_port:ports space "->" space dst_host:hosts space dst_port:ports space
     {
         def process
-            return {:protocol => proto.text_value, :src_hosts => src_host.text_value,
-               :src_ports => src_port.text_value, :dst_hosts => dst_host.text_value,
-               :dst_ports => dst_port.text_value}
+            return {:protocol => proto.text_value,
+                    :src_hosts => src_host.text_value,
+                    :src_ports => src_port.text_value,
+                    :dst_hosts => dst_host.text_value,
+                    :dst_ports => dst_port.text_value}
         end
     }
   end
@@ -79,7 +77,6 @@ grammar Rules
   end
   rule lone_key
     space? key ";"
-    # GRAMMAR WILL BREAK IF YOU PUT THIS IN ()!
     {
         def process
             return {key.text_value => nil}
