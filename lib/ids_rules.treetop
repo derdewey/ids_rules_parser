@@ -2,7 +2,7 @@ require 'rubygems'
 require 'treetop'
 require 'pp'
 
-grammar Rules
+grammar IDSRules
   rule rules_file
     (complete_sig / comment / empty_line)*
     {
@@ -93,7 +93,7 @@ grammar Rules
     [\s]+
   end
   rule proto
-    "tcp" / "udp"
+    "tcp" / "udp" / "icmp"
   end
   rule hosts
     (!" " .)* / "any"
