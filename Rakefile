@@ -9,9 +9,9 @@ task :default => 'test:run'
 task 'gem:release' => 'test:run'
 
 Bones {
+  ignore_file '.gitignore'
   name     'ids_rules_parser'
   authors  'Xavier Lange, Kris Barrett'
   email    'xrlange@gmail.com'
   url      'http://example.com/'
 }
-
