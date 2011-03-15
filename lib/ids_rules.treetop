@@ -93,7 +93,7 @@ grammar IDSRules
     [\s]+
   end
   rule proto
-    "tcp" / "udp" / "icmp"
+    "tcp" / "udp" / "icmp" / "ip"
   end
   rule hosts
     (!" " .)* / "any"
