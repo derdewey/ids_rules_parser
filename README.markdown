@@ -21,4 +21,14 @@ This grammar will parse the rules and them in to
 
 And then you do something cool with that.
 
+# Usage
+
+require 'rubygems'
+require 'treetop'
+Treetop.require 'rules'
+parser = RulesParser.new
+parser.parse(some_rule_data)
+
+Take a look at convert.rb for a basic example
+
 This is 3-clause BSD licensed. Copyright Xavier Lange and Kris Barrett.
