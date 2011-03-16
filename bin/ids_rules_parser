@@ -6,22 +6,35 @@ require 'pp'
 Bundler.require if File.exists?("./Gemfile")
 require 'ids_rules_parser'
 
-raise RuntimeError, "provide a file to parse" if ARGV.empty?
+if ARGV.empty?
+  puts "usage: #{__FILE__} file/to/parse.rules"
+  exit(1)
+end
 
 parser = IDSRulesParser.new
 parser.consume_all_input = true
-file = File.read(ARGV.first)
-# file = File.read("rules/test.rules")
+filename = ARGV.first
+file = File.read(filename)
 parsed_data = parser.parse(file)
 if(parsed_data.nil?)
-  puts "Parsing failed"
+  puts "Could not parse the rule file #{filename}"
   puts parser.failure_reason
   puts "Failure line: " + parser.failure_line.to_s
   puts "Failure column: " + parser.failure_column.to_s
 else
   rule_data = parsed_data.process
-  pp rule_data
-  puts rule_data.length
+  rule_data.each do |x|
+    x[:signature].each do |y|
+      print y.keys.first + ","
+      if(!y.values.first.nil?)
+        puts y.values.first
+      else
+        puts
+      end
+    end
+  end
+  puts filename + ": " + rule_data.length.to_s
+  exit(1)
 end
 
 
