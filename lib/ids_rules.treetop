@@ -57,8 +57,9 @@ grammar IDSRules
     "(" values:(lone_key / key_value_pair)+ ")"
     {
         def process
-            collection = values.elements.collect do |x|
-                x.process
+            collection = values.elements.inject({}) do |hash,x|
+                hash.merge!(x.process)
+                hash
             end
             collection
         end
