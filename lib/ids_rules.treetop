@@ -42,7 +42,7 @@ grammar IDSRules
     }
   end
   rule app
-    "alert" space proto space src_host:hosts space src_port:ports space "->" space dst_host:hosts space dst_port:ports space
+    "alert" space proto space src_host:hosts space src_port:ports space direction space dst_host:hosts space dst_port:ports space
     {
         def process
             return {:protocol => proto.text_value,
@@ -65,15 +65,21 @@ grammar IDSRules
     }
   end
   rule key_value_pair
-    space? key ":" value:(quoted_value/value) ";"
+    #space? key ":" value:(quoted_value/value) ";"
+    space? key ":" value:((quoted_value)/(value)) space?
     {
         def process
-            return {key.text_value => value.text_value}
+            return {key.process => value.process}
         end
     }
   end
   rule key
     [\w]+
+    {
+        def process
+            text_value
+        end
+    }
   end
   rule lone_key
     space? key ";"
@@ -84,10 +90,25 @@ grammar IDSRules
     }
   end
   rule value
-    (![:;] .)+
+    #(!"\;" .)* ";"
+    the_value:((!";" value_char)*) ";"
+    {
+        def process
+            the_value.text_value
+        end
+    }
   end
   rule quoted_value # for future ref
-    (["] (!["] .)* ["])
+    # ("\"" (!unescaped_quote .)* "\";")
+    "\"" the_value:(!"\";" .)* "\";"
+    {
+        def process
+            the_value.text_value
+        end
+    }
+  end
+  rule unescaped_quote
+    !(!"[" "\"")
   end
   rule space
     [\s]+
@@ -100,5 +121,11 @@ grammar IDSRules
   end
   rule ports
     (!" " .)* / "any"
+  end
+  rule direction
+    "->" / "<>" / "<-"
+  end
+rule value_char
+    ("\\" .) / .
   end
 end
