@@ -12,44 +12,45 @@ if ARGV.empty?
   exit(1)
 end
 
-parser = IDSRulesParser.new
-parser.consume_all_input = true
+# Parse each file
 file_list = ARGV.collect {|x| Dir.glob(x)}
 file_list.flatten!
 file_list.uniq!
 file_list.each do |filename|
-	file = File.read(filename)
-	parsed_data = parser.parse(file)
-	if(parsed_data.nil?)
-	  puts "Could not parse the rule file #{filename}"
-	  puts parser.failure_reason
-	  puts "Failure line: " + parser.failure_line.to_s
-	  puts "Failure column: " + parser.failure_column.to_s
-	else
-	  rule_data = parsed_data.process
-	  client_friendly_data = {}
-	  
-	  rule_data.each do |x|
-		# Extract key
-		gid = x[:signature]["gid"]
-		if(gid.nil?) then
-			gid = "1"
-		end
-		sid = x[:signature]["sid"]
-		rev = x[:signature]["rev"]
+	# Setup parser
+	parser = IDSRulesParser.new
+	parser.consume_all_input = true
+
+	# Open input file
+	puts filename
+	file = File.open(filename, 'r')
 		
-		key = gid + "." + sid + "." + rev
-		client_friendly_data.merge!(key => x)
-		# Convert to json
-		# json_file.puts ({"#{gid}.#{sid}.#{rev}"=>{"sig"=>x[:signature], "app"=>x[:application]}}).to_json + ","
-	  end
-	  File.open(filename + ".json", 'w') do |file|
-		file.puts (client_friendly_data.to_json)
-	  end
-	  puts filename + ": " + rule_data.length.to_s
+	# Open output file
+	File.open(filename+".json",'w') do |writer|
+		begin
+			client_friendly_data = {}
+			while((contents = file.gets) != nil)
+				# Process a line of input
+				rule_data = parser.parse(contents).process
+				
+				# Output rule information to json file
+				rule_data.each do |x|
+					# Extract key
+					gid = x[:signature]["gid"]
+					if(gid.nil?) then
+						gid = "1"
+					end
+					sid = x[:signature]["sid"]
+					rev = x[:signature]["rev"]
+					key = gid + "." + sid + "." + rev
+					
+					# Merge all data into a single hash
+					client_friendly_data.merge!(key => x)
+				end
+			end
+			# Conver to json and output to json file
+			writer.puts (client_friendly_data.to_json)
+		end
 	end
 end
 exit(1)
-
-
-
