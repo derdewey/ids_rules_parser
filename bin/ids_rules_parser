@@ -14,38 +14,42 @@ end
 
 parser = IDSRulesParser.new
 parser.consume_all_input = true
-filename = ARGV.first
-file = File.read(filename)
-parsed_data = parser.parse(file)
-if(parsed_data.nil?)
-  puts "Could not parse the rule file #{filename}"
-  puts parser.failure_reason
-  puts "Failure line: " + parser.failure_line.to_s
-  puts "Failure column: " + parser.failure_column.to_s
-else
-  rule_data = parsed_data.process
-  client_friendly_data = {}
-  
-  rule_data.each do |x|
-	# Extract key
-	gid = x[:signature]["gid"]
-	if(gid.nil?) then
-		gid = "1"
+file_list = ARGV.collect {|x| Dir.glob(x)}
+file_list.flatten!
+file_list.uniq!
+file_list.each do |filename|
+	file = File.read(filename)
+	parsed_data = parser.parse(file)
+	if(parsed_data.nil?)
+	  puts "Could not parse the rule file #{filename}"
+	  puts parser.failure_reason
+	  puts "Failure line: " + parser.failure_line.to_s
+	  puts "Failure column: " + parser.failure_column.to_s
+	else
+	  rule_data = parsed_data.process
+	  client_friendly_data = {}
+	  
+	  rule_data.each do |x|
+		# Extract key
+		gid = x[:signature]["gid"]
+		if(gid.nil?) then
+			gid = "1"
+		end
+		sid = x[:signature]["sid"]
+		rev = x[:signature]["rev"]
+		
+		key = gid + "." + sid + "." + rev
+		client_friendly_data.merge!(key => x)
+		# Convert to json
+		# json_file.puts ({"#{gid}.#{sid}.#{rev}"=>{"sig"=>x[:signature], "app"=>x[:application]}}).to_json + ","
+	  end
+	  File.open(filename + ".json", 'w') do |file|
+		file.puts (client_friendly_data.to_json)
+	  end
+	  puts filename + ": " + rule_data.length.to_s
 	end
-	sid = x[:signature]["sid"]
-	rev = x[:signature]["rev"]
-	
-	key = gid + "." + sid + "." + rev
-	client_friendly_data.merge!(key => x)
-	# Convert to json
-	# json_file.puts ({"#{gid}.#{sid}.#{rev}"=>{"sig"=>x[:signature], "app"=>x[:application]}}).to_json + ","
-  end
-  File.open("rules.json", 'w') do |file|
-  	file.puts (client_friendly_data.to_json)
-  end
-  puts filename + ": " + rule_data.length.to_s
-  exit(1)
 end
+exit(1)
 
 
 
