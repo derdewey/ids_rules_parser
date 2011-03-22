@@ -49,7 +49,8 @@ grammar IDSRules
                     :src_hosts => src_host.text_value,
                     :src_ports => src_port.text_value,
                     :dst_hosts => dst_host.text_value,
-                    :dst_ports => dst_port.text_value}
+                    :dst_ports => dst_port.text_value,
+                    :direction => direction.text_value}
         end
     }
   end
