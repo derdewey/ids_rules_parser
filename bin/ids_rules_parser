@@ -8,7 +8,7 @@ require 'ids_rules_parser'
 require 'json'
 
 if ARGV.empty?
-  puts "usage: #{__FILE__} file/to/parse.rules"
+  puts "usage: ids_rules_parser path/to/rules/file"
   exit(1)
 end
 
