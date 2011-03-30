@@ -30,10 +30,10 @@ Examples
 --------
 
     require 'rubygems'
-    require 'treetop'
-    Treetop.require 'rules'
-    parser = RulesParser.new
-    parser.parse(some_rule_data)
+    require 'ids_rules_parser'
+    parser = IDSRulesParser.new
+    parsed_data = parser.parse(some_rule_data)
+    arr_of_hashes = parsed_data.process
 
 Requirements
 ------------
