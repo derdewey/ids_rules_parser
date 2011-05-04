@@ -6,14 +6,43 @@ require 'pp'
 Bundler.require if File.exists?("./Gemfile")
 require 'ids_rules_parser'
 require 'json'
+require 'choice'
 
-if ARGV.empty?
-  puts "usage: ids_rules_parser path/to/rules/file"
-  exit(1)
+Choice.options do
+	banner "Usage: ids_rules_parser [-c csv_file] -f file"
+	
+	header ''
+	header 'Parses the specified rule file and converts it to json format.'
+	header ''
+	header 'Options:'
+	
+	option :file, :required => true do
+    	short '-f'
+    	long '--file *FILES'
+    	desc 'File to be parsed.'
+    end
+	
+	option :csv do
+      short '-c'
+      long '--csv csv_file'
+      desc 'Output rule messages to the specified csv file.'
+    end
+    
+    option :help do
+      short '-h'
+      long '--help'
+      desc 'Show this message.'
+    end
+end
+
+# Open csv file, if option selected
+if Choice.choices[:csv]
+	csv = File.open(Choice.choices[:csv], 'w')
+	csv.puts "group_id,signature_id,rev,msg"
 end
 
 # Parse each file
-file_list = ARGV.collect {|x| Dir.glob(x)}
+file_list = Choice.choices[:file].collect {|x| Dir.glob(x)}
 file_list.flatten!
 file_list.uniq!
 file_list.each do |filename|
@@ -42,14 +71,20 @@ file_list.each do |filename|
 					end
 					sid = x[:signature]["sid"]
 					rev = x[:signature]["rev"]
+					msg = x[:signature]["msg"]
 					key = gid + "." + sid + "." + rev
 					
 					# Merge all data into a single hash
 					client_friendly_data.merge!(key => x)
+					
+					# Output message to csv file, if option selected
+					if Choice.choices[:csv]
+						csv.puts gid + "," + sid + "," + rev + "," + msg
+					end
 				end
 			end
 			# Conver to json and output to json file
-			writer.puts (client_friendly_data.to_json)
+			writer.puts(client_friendly_data.to_json)
 		end
 	end
 end
