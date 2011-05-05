@@ -10,16 +10,13 @@ require 'choice'
 
 Choice.options do
 	banner "Usage: ids_rules_parser [-c csv_file] -f file"
-	
-	header ''
-	header 'Parses the specified rule file and converts it to json format.'
 	header ''
 	header 'Options:'
 	
 	option :file, :required => true do
     	short '-f'
     	long '--file *FILES'
-    	desc 'File to be parsed.'
+    	desc 'File(s) to be parsed.'
     end
 	
 	option :csv do
@@ -33,6 +30,18 @@ Choice.options do
       long '--help'
       desc 'Show this message.'
     end
+    
+            #--------------------------------------------------------------------------------
+	footer ''
+	footer 'Parses the specified rules file and outputs a json file. If the path of the the'
+	footer 'specifed file is /path/to/file.rules, then the json file will be written to '
+	footer '/path/to/file.rules.json. Also, multiple input files can be specified using '
+	footer 'regular expressions. For example, ids_rules_parser -f /path/to/*.rules will '
+	footer 'parse all rules files in the /path/to/ directory. The csv file option will '
+	footer 'output a csv file in the following format:'
+	footer ''      
+	footer 'generator_id, signature_id, signature_revision, message'
+    
 end
 
 # Open csv file, if option selected
